@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
     private lateinit var questionTextView: TextView
-
+    private var countTrueButtom = 0
 
     private val questionBank = listOf(
         Question(R.string.question_australia, true),
@@ -49,6 +49,8 @@ class MainActivity : AppCompatActivity() {
         trueButton.setOnClickListener { view: View? ->
 
             checkAnswer(true)
+            trueButton.isEnabled = false
+            countTrueButtom++
         }
         falseButton.setOnClickListener { view: View? ->
             checkAnswer(false)
@@ -60,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         nextButton.setOnClickListener {
-
+            trueButton?.isEnabled = true
            if (currentIndex == null){
             val toast = Toast.makeText(this, "Ehaugh", Toast.LENGTH_SHORT)
             toast.setGravity(Gravity.TOP, 0, 300)
@@ -118,7 +120,10 @@ class MainActivity : AppCompatActivity() {
 
         val messageResId = if (userAnswer == correctAnswer){
             R.string.correct_toast
-        } else{
+        //    trueButton.isEnabled = false
+        }
+
+        else{
             R.string.incorrect_toast
         }
 
