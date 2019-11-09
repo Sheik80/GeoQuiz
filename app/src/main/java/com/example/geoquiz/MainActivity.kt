@@ -24,17 +24,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var questionTextView: TextView
     private var countTrueButtom = 0
 
-    private val questionBank = listOf(
-        Question(R.string.question_australia, true),
-        Question(R.string.question_oceans, true),
-        Question(R.string.question_mideast, true),
-        Question(R.string.question_africa, true),
-        Question(R.string.question_americas, true),
-        Question(R.string.question_asia, true)
-    )
-
-    private var currentIndex = 0
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
