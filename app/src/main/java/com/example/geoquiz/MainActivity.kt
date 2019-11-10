@@ -1,7 +1,9 @@
 package com.example.geoquiz
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -14,6 +16,8 @@ import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
 
 private const val TAG = "MainActivity"
+private const val KEY_INDEX = "index"
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,17 +26,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
     private lateinit var questionTextView: TextView
-    private var countTrueButtom = 0
+    private val quizViewModel: QuizViewModel by lazy {
+        ViewModelProviders.of(this).get(QuizViewModel::class.java)
+    }
+    private var countTrueAnswer = 0
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate(Bundle?) called")
         setContentView(R.layout.activity_main)
-
-        val provider: ViewModelProvider = ViewModelProviders.of(this)
-        val quizViewModel = provider.get(QuizViewModel::class.java)
-        Log.d(TAG, "Got a QuizViewModel: $quizViewModel")
 
         trueButton = findViewById(R.id.true_button)
         falseButton = findViewById(R.id.false_button)
@@ -45,35 +49,37 @@ class MainActivity : AppCompatActivity() {
 
             checkAnswer(true)
             trueButton.isEnabled = false
-            countTrueButtom++
+
         }
         falseButton.setOnClickListener { view: View? ->
             checkAnswer(false)
         }
 
         questionTextView.setOnClickListener{
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             updateQuestion()
         }
 
         nextButton.setOnClickListener {
             trueButton?.isEnabled = true
-           if (currentIndex == null){
+           if (quizViewModel.currentIndex == null){
             val toast = Toast.makeText(this, "Ehaugh", Toast.LENGTH_SHORT)
             toast.setGravity(Gravity.TOP, 0, 300)
             toast.show()
-            currentIndex = 1}
+            quizViewModel.currentIndex = 1}
             else {
-               currentIndex = (currentIndex + 1) % questionBank.size
+               quizViewModel.moveToNext()
                updateQuestion()
            }
         }
         prevButton.setOnClickListener {
-            currentIndex = (currentIndex - 1) % questionBank.size
+            quizViewModel.currentIndex-1
+
             updateQuestion()
         }
 
         updateQuestion()
+        checkPersent()
     }
 
 
@@ -92,6 +98,12 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onPause() called")
     }
 
+    override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        Log.i(TAG, "onSaveInstanceState")
+        savedInstanceState.putInt(KEY_INDEX, quizViewModel.currentIndex)
+    }
+
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onStop() called")
@@ -105,26 +117,34 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateQuestion() {
 
-        val questionTextResId = questionBank[currentIndex].textResId
+        val questionTextResId = quizViewModel.currentQuestionText
         questionTextView.setText(questionTextResId)
 
     }
 
     private fun  checkAnswer(userAnswer: Boolean){
-        val correctAnswer = questionBank[currentIndex].answer
+        val correctAnswer = quizViewModel.currentQuestionAnswer
 
         val messageResId = if (userAnswer == correctAnswer){
+            countTrueAnswer++
             R.string.correct_toast
-        //    trueButton.isEnabled = false
+
         }
 
         else{
             R.string.incorrect_toast
         }
 
-
         val toast = Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
         toast.setGravity(Gravity.TOP, 0, 300)
             toast.show()
+    }
+
+    @SuppressLint("StringFormatInvalid")
+    private fun checkPersent(){
+        val score = countTrueAnswer*100/6
+        val message = getString(R.string.percent_toast, score)
+        Toast.makeText(this,message,Toast.LENGTH_LONG)
+
     }
 }
