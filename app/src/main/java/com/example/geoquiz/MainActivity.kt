@@ -38,6 +38,9 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate(Bundle?) called")
         setContentView(R.layout.activity_main)
 
+        val currentIndex = savedInstanceState?.getInt(KEY_INDEX, 0) ?: 0
+        quizViewModel.currentIndex = currentIndex
+
         trueButton = findViewById(R.id.true_button)
         falseButton = findViewById(R.id.false_button)
         nextButton = findViewById(R.id.next_button)
@@ -62,8 +65,8 @@ class MainActivity : AppCompatActivity() {
 
         nextButton.setOnClickListener {
             trueButton?.isEnabled = true
-           if (quizViewModel.currentIndex == null){
-            val toast = Toast.makeText(this, "Ehaugh", Toast.LENGTH_SHORT)
+           if (currentIndex == null){
+            val toast = Toast.makeText(this, "Enough", Toast.LENGTH_SHORT)
             toast.setGravity(Gravity.TOP, 0, 300)
             toast.show()
             quizViewModel.currentIndex = 1}
